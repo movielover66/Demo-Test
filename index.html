@@ -4,134 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PREMIUM MOVIE STUDIO</title>
-    
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Baloo+Da+2:wght@800&family=Galada&family=Hind+Siliguri:wght@700&family=Noto+Serif+Bengali:wght@900&family=Anton&family=Bebas+Neue&family=Poppins:wght@700;900&display=swap" rel="stylesheet">
-    
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
-
-    <style>
-        :root { --primary: #e50914; --gold: #ffd700; --bg: #0c0c0c; --card-bg: #141414; --glass: rgba(255, 255, 255, 0.1); }
-        body { background-color: var(--bg); color: #fff; font-family: 'Hind Siliguri', sans-serif; margin: 0; padding: 0; overflow-x: hidden; scroll-behavior: smooth; }
-        
-        #offlineMessage { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.95); color: white; text-align: center; z-index: 9999; padding-top: 30%; }
-        .reload-btn { background: var(--primary); color: white; border: none; padding: 12px 25px; border-radius: 25px; font-weight: bold; margin-top: 20px; cursor: pointer; box-shadow: 0 0 15px rgba(229, 9, 20, 0.4); }
-
-        /* NAVBAR */
-        .navbar { background-color: #0c0c0c; padding: 25px 10px; text-align: center; position: relative; z-index: 1000; border-bottom: 1px solid #222; box-shadow: 0 4px 20px rgba(0,0,0,0.8); }
-        .nav-header { margin-bottom: 15px; display: flex; flex-direction: column; align-items: center; }
-        .navbar h1 { font-size: 36px; margin: 5px 0; font-weight: 900; letter-spacing: 0.5px; line-height: 1.4; text-transform: uppercase; display: inline-block; background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent; color: #fff; filter: drop-shadow(0px 0px 15px rgba(255, 255, 255, 0.15)); }
-        .navbar p { font-size: 10px; margin: 0; color: #888; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; font-family: 'Poppins', sans-serif; }
-
-        .category-scroll { display: flex; overflow-x: auto; gap: 8px; padding: 10px 5px; margin: 10px 0; scrollbar-width: none; }
-        .category-scroll::-webkit-scrollbar { display: none; } 
-        .cat-btn { background: #222; color: #ccc; border: 1px solid #444; padding: 8px 15px; border-radius: 20px; font-size: 13px; font-weight: bold; white-space: nowrap; cursor: pointer; transition: all 0.3s; font-family: 'Hind Siliguri', sans-serif; }
-        .cat-btn.active, .cat-btn:hover { background: var(--primary); color: #fff; border-color: var(--primary); box-shadow: 0 4px 10px rgba(229, 9, 20, 0.4); }
-
-        .req-notice-container { width: 100%; overflow: hidden; background: rgba(229, 9, 20, 0.15); margin-top: 5px; padding: 6px 0; border-top: 1px solid rgba(255, 215, 0, 0.1); border-bottom: 1px solid rgba(255, 215, 0, 0.1); }
-        .req-notice { display: inline-block; white-space: nowrap; font-size: 12px; color: #ffd700; font-weight: 600; animation: marquee 15s linear infinite; }
-        @keyframes marquee { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
-
-        .top-action-bar { display: flex; align-items: center; gap: 10px; width: 95%; margin: 15px auto 0 auto; }
-        .search-container { position: relative; flex: 1; display: flex; align-items: center; background: #1a1a1a; border: 1px solid #333; border-radius: 25px; padding: 2px 15px; }
-        .search-container i { color: #888; font-size: 14px; }
-        #movieSearch { width: 100%; padding: 10px; border: none; background: transparent; color: #fff; font-size: 14px; outline: none; font-family: 'Hind Siliguri', sans-serif; }
-        .nav-req-btn { background: #e50914; color: #fff; border: none; padding: 10px 18px; border-radius: 20px; font-size: 13px; font-weight: 900; white-space: nowrap; cursor: pointer; box-shadow: 0 0 10px rgba(229, 9, 20, 0.5); }
-
-        /* MOVIE CARDS */
-        .movie-grid { display: flex; flex-wrap: wrap; padding: 10px; justify-content: space-between; gap: 10px; }
-        .movie-box { width: 48%; margin-bottom: 15px; perspective: 1200px; }
-        .movie-card { background: var(--card-bg); border-radius: 12px; overflow: hidden; border: 1px solid #222; transition: all 0.4s cubic-bezier(0.2, 1, 0.3, 1); opacity: 0; transform: translateY(20px); height: 430px; display: flex; flex-direction: column; }
-        .movie-card.show { opacity: 1; transform: translateY(0); }
-        .movie-card:hover { transform: scale(1.03); box-shadow: 0 10px 20px rgba(0,0,0,0.5); border-color: #444; }
-        .image-container { position: relative; width: 100%; height: 320px; min-height: 320px; overflow: hidden; }
-        .movie-img { width: 100%; height: 100%; object-fit: cover; }
-        .trending-badge { position: absolute; top: 10px; left: 0; background: linear-gradient(90deg, #ff8c00, #ff0000); color: #fff; font-size: 10px; padding: 4px 10px; font-weight: bold; border-radius: 0 20px 20px 0; box-shadow: 2px 2px 10px rgba(0,0,0,0.6); z-index: 5; animation: pulse 1.5s infinite; display: flex; align-items: center; gap: 5px;}
-        @keyframes pulse { 0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 69, 0, 0.7); } 70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(255, 69, 0, 0); } 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 69, 0, 0); } }
-        .tag-area { height: 22px; margin: 4px 0; display: flex; justify-content: center; align-items: center; }
-        .recent-tag { background: #ff0000; color: #fff; font-size: 9px; font-weight: bold; padding: 2px 8px; border-radius: 4px; text-transform: uppercase; }
-        .newly-tag { background: #00d2ff; color: #000; font-size: 9px; font-weight: bold; padding: 2px 8px; border-radius: 4px; text-transform: uppercase; }
-        .must-tag { background: #ff9800; color: #000; font-size: 9px; font-weight: bold; padding: 2px 8px; border-radius: 4px; text-transform: uppercase; }
-        .res-badge { position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.8); color: var(--gold); padding: 3px 8px; border-radius: 5px; font-size: 9px; font-weight: bold; border: 0.5px solid var(--gold); }
-        .upload-info { padding: 6px 4px; text-align: center; background: #111; flex-grow: 1; display: flex; flex-direction: column; justify-content: center; }
-        .time-text { font-size: 11px; color: #ccc; font-weight: 600; margin-bottom: 2px; display: block; }
-        .movie-title { font-size: 12px; font-weight: bold; color: #ffffff; margin: 2px 0 0 0; height: 32px; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-
-        /* DETAILS & PLAYER */
-        #detailsPage { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 2000; overflow-y: auto; animation: slideIn 0.4s ease-out; }
-        @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
-        .back-btn { position: absolute; top: 20px; left: 20px; background: rgba(0,0,0,0.6); color: #fff; border: none; padding: 10px; border-radius: 50%; font-size: 18px; z-index: 10; cursor: pointer; }
-        .hero-banner { height: 280px; background-size: cover; background-position: center; position: relative; }
-        .hero-overlay { position: absolute; bottom: 0; width: 100%; height: 100%; background: linear-gradient(to top, var(--bg), transparent); }
-        .content-wrap { padding: 20px; margin-top: -60px; position: relative; }
-        .details-poster { width: 120px; border-radius: 12px; border: 3px solid var(--primary); }
-        .description { font-size: 13px; line-height: 1.6; color: #ccc; background: var(--glass); padding: 15px; border-radius: 12px; margin: 20px 0; border: 1px solid rgba(255,255,255,0.05); }
-        
-        .related-section { margin-top: 30px; }
-        .related-title { font-size: 16px; font-weight: bold; color: #fff; margin-bottom: 15px; border-left: 4px solid var(--gold); padding-left: 10px; }
-        .related-grid { display: flex; overflow-x: auto; gap: 10px; padding-bottom: 10px; scrollbar-width: none; }
-        .related-card { min-width: 130px; width: 130px; background: #1a1a1a; border-radius: 8px; overflow: hidden; border: 1px solid #333; }
-        .related-img { width: 100%; height: 180px; object-fit: cover; }
-        .related-info { padding: 8px; font-size: 11px; text-align: center; }
-
-        /* CINEFREAK CARD STYLES */
-        .cine-card { background: #1f1f1f; border-radius: 8px; margin-bottom: 12px; border: 1px solid #333; overflow: hidden; }
-        .cine-header { display: flex; align-items: center; padding: 15px; cursor: pointer; background: #252525; transition: 0.2s; position: relative; }
-        .cine-header:hover { background: #2a2a2a; }
-        .season-text { font-size: 20px; font-weight: 800; color: #ffc107; margin-right: 15px; min-width: 45px; text-shadow: 0 2px 10px rgba(255, 193, 7, 0.3); text-align: center; }
-        .ep-info { flex: 1; }
-        .ep-title { color: #fff; font-weight: 700; font-size: 15px; margin-bottom: 6px; display: block; }
-        .tag-row { display: flex; gap: 6px; flex-wrap: wrap; }
-        .tag { font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 50px; color: #fff; text-transform: uppercase; }
-        .tag-red { background: #ef4444; } .tag-teal { background: #14b8a6; } .tag-new { background: #ffc107; color: #000; animation: pulse 1.5s infinite; }
-        .arrow-icon { color: #888; transition: 0.3s; margin-left: 10px; } .rotate { transform: rotate(180deg); }
-        .cine-content { display: none; background: #151515; padding: 12px; border-top: 1px solid #333; }
-        .dl-row { display: flex; justify-content: space-between; align-items: center; background: #222; padding: 10px; margin-bottom: 8px; border-radius: 6px; border-left: 3px solid #ffc107; }
-        .dl-btn { background: linear-gradient(45deg, #e50914, #ff4b2b); border: none; color: white; padding: 6px 14px; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer; text-decoration: none; display: inline-block;}
-        .note-box { border: 1px solid #ffc107; background: rgba(255, 193, 7, 0.1); color: #ffc107; padding: 12px; border-radius: 6px; font-size: 13px; text-align: center; margin-bottom: 20px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px; }
-
-        .pagination { display: flex; justify-content: center; align-items: center; gap: 15px; padding: 20px; }
-        .page-btn { background: #222; color: #fff; border: 1px solid var(--primary); padding: 8px 16px; border-radius: 8px; font-size: 12px; }
-        .footer { background: #111; padding: 20px; text-align: center; border-top: 1px solid #222; font-size: 13px; color: #777; }
-        
-        #installAppBtn { display: none; position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--primary); color: white; border: none; padding: 10px 25px; border-radius: 50px; font-weight: bold; box-shadow: 0 5px 20px rgba(229, 9, 20, 0.5); z-index: 9000; animation: bounce 2s infinite; }
-        @keyframes bounce { 0%, 20%, 50%, 80%, 100% {transform: translateX(-50%) translateY(0);} 40% {transform: translateX(-50%) translateY(-10px);} 60% {transform: translateX(-50%) translateY(-5px);} }
-
-        /* --- NEW RGB PLAYER STYLES (ADDED) --- */
-        #rgbPlayerModal {
-            display: none; position: fixed; inset: 0; z-index: 9999;
-            flex-direction: column; align-items: center; justify-content: center;
-            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
-            background-size: 400% 400%;
-            animation: bgAnim 15s ease infinite;
-        }
-        @keyframes bgAnim { 0% {background-position: 0% 50%;} 50% {background-position: 100% 50%;} 100% {background-position: 0% 50%;} }
-
-        .rgb-box {
-            position: relative; width: 95%; max-width: 800px; aspect-ratio: 16/9;
-            background: #000; border-radius: 12px; overflow: hidden;
-            border: 2px solid red; box-shadow: 0 0 20px red;
-            animation: slowGlow 10s linear infinite;
-        }
-        @keyframes slowGlow {
-            0% { border-color: #ff0000; box-shadow: 0 0 25px rgba(255,0,0,0.5); }
-            25% { border-color: #ff00ff; box-shadow: 0 0 25px rgba(255,0,255,0.5); }
-            50% { border-color: #0000ff; box-shadow: 0 0 25px rgba(0,0,255,0.5); }
-            75% { border-color: #00ff00; box-shadow: 0 0 25px rgba(0,255,0,0.5); }
-            100% { border-color: #ff0000; box-shadow: 0 0 25px rgba(255,0,0,0.5); }
-        }
-
-        .fake-cover { position: absolute; inset: 0; background-size: cover; background-position: center; z-index: 10; display: flex; align-items: center; justify-content: center; cursor: pointer; background-color: #000; }
-        .big-play-btn { width: 70px; height: 70px; background: rgba(255,255,255,0.9); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; color: #000; animation: pulse 1.5s infinite; }
-        .player-close-btn { margin-top: 15px; padding: 8px 20px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; border-radius: 30px; cursor: pointer; font-weight: bold; font-size: 12px; }
-
-        .vpn-box { width: 90%; max-width: 800px; margin-top: 15px; padding: 12px; background: rgba(255, 165, 0, 0.1); border-left: 4px solid orange; border-radius: 6px; display: flex; align-items: center; gap: 15px; backdrop-filter: blur(5px); }
-        .vpn-icon { font-size: 24px; color: orange; }
-        .vpn-text { font-size: 12px; color: #ddd; line-height: 1.4; font-family: 'Hind Siliguri', sans-serif; }
-        .vpn-highlight { color: #fff; font-weight: bold; text-decoration: underline; }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div id="offlineMessage">
@@ -148,7 +26,6 @@
                 <h1 id="dynamicTitle">PREMIUM MOVIE STUDIO</h1>
                 <p>ULTIMATE MOVIE COLLECTION</p>
             </div>
-            
             <div class="category-scroll">
                 <button class="cat-btn active" onclick="filterCategory('All')">সব</button>
                 <button class="cat-btn" onclick="filterCategory('Action')">অ্যাকশন</button>
@@ -160,14 +37,12 @@
                 <button class="cat-btn" onclick="filterCategory('Thriller')">থ্রিলার</button>
                 <button class="cat-btn" onclick="filterCategory('Bangla')">বাংলা</button>
             </div>
-
             <div class="req-notice-container"><div class="req-notice">📢 রিকোয়েস্ট করার ২৪ ঘণ্টার মধ্যে মুভি পেয়ে যাবেন &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 📢 মুভি খুঁজতে উপরের সার্চ বক্স ব্যবহার করুন</div></div>
             <div class="top-action-bar">
                 <div class="search-container"><i class="fas fa-search"></i><input type="text" id="movieSearch" placeholder="মুভি খুঁজুন..." onkeyup="searchMovie()"></div>
                 <button class="nav-req-btn" onclick="openReqModal()">রিকোয়েস্ট</button>
             </div>
         </div>
-        
         <div class="movie-grid" id="movieList"></div>
         <div class="pagination">
             <button class="page-btn" id="prevBtn" onclick="changePage(-1)">পেছনে</button>
@@ -183,23 +58,54 @@
     </div>
     
     <div id="rgbPlayerModal">
-        <button class="player-close-btn" onclick="closeRgbPlayer()" style="position:absolute; top:20px; right:20px; margin:0;">✕ CLOSE</button>
+    <button class="player-close-btn" onclick="closeRgbPlayer()">✕</button>
+    
+    <div class="rgb-box">
+        <div id="fc-cover" class="fake-cover" onclick="startVideo()">
+            <div class="big-play-btn"><i class="fa-solid fa-play"></i></div>
+        </div>
+       <iframe id="fc-iframe" 
+    style="width:100%; height:100%; border:none;" 
+    allowfullscreen="true" 
+    webkitallowfullscreen="true" 
+    mozallowfullscreen="true"
+    allow="autoplay; fullscreen; picture-in-picture; encrypted-media; gyroscope; accelerometer; screen-wake-lock; orientation-lock">
+</iframe>
+
+    </div>
+
+    <div class="player-controls-container">
         
-        <div class="rgb-box">
-            <div id="fc-cover" class="fake-cover" onclick="startSecureVideo()">
-                <div class="big-play-btn"><i class="fa-solid fa-play"></i></div>
-            </div>
-            <iframe id="fc-iframe" style="width:100%;height:100%;border:none;" allowfullscreen></iframe>
+        <div class="control-group" id="serverListArea">
+            <span class="ctrl-label">Source</span>
+            <div id="dynamicServerBtns" style="display:flex; gap:8px; flex:1;"></div>
         </div>
 
-        <div class="vpn-box">
-            <div class="vpn-icon"><i class="fa-solid fa-shield-halved"></i></div>
-            <div class="vpn-text">
-                <strong>⚠️ Ad-Free Experience:</strong> For the best experience without ads, please <span class="vpn-highlight">connect to a VPN</span>.<br>
-                <strong>⚠️ বিজ্ঞাপন মুক্ত দেখতে:</strong> অ্যাড ছাড়া ভিডিও দেখতে হলে দয়া করে একটি <span class="vpn-highlight">VPN কানেক্ট করুন</span>।
+        <div class="control-group">
+            <span class="ctrl-label">Mode</span>
+            <div style="display:flex; gap:8px; flex:1;">
+                <button onclick="setPlayerMode('normal')" class="mode-btn" id="btnNormal">Normal</button>
+                <button onclick="setPlayerMode('sandbox')" class="mode-btn active" id="btnSandbox">Soundbox</button>
             </div>
         </div>
+
+        <div class="mode-info-box" id="modeInfoText">
+            <div style="margin-bottom:4px;">
+                <span class="mode-info-title">🔊 Soundbox (Secure):</span> 
+                অ্যাড এবং রিডাইরেক্ট ব্লক করে। নিরাপদ কিন্তু কিছু ভিডিও প্লে না-ও হতে পারে।
+            </div>
+            <div>
+                <span class="mode-info-title" style="color:#00d2ff;">▶ Normal:</span> 
+                সব প্লেয়ার সাপোর্ট করে। তবে কিছু পপ-আপ অ্যাড আসতে পারে।
+            </div>
+        </div>
+
+        <button onclick="reportBrokenLink()" class="report-btn">
+            <i class="fa-solid fa-triangle-exclamation"></i> Video Play না হলে রিপোর্ট করুন
+        </button>
     </div>
+</div>
+
 
     <div id="downloadPopup" style="display:none; position:fixed; inset:0; background: rgba(0,0,0,0.85); z-index:3000; align-items:center; justify-content:center;">
       <div style="background:#111; padding:20px; border-radius:12px; width:80%; max-width:320px; text-align:center; border:1px solid #333; box-shadow:0 0 20px rgba(0,0,0,0.8);">
@@ -218,303 +124,9 @@
             <button onclick="closeReqModal()" style="width:100%; padding:10px; background:transparent; color:#888; border:none; margin-top:10px; cursor:pointer;">বন্ধ করুন</button>
         </div>
     </div>
-    
-    <div id="vpnNotice" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 10000; align-items: center; justify-content: center; padding: 20px;">
-        <div style="background: #1a1a1a; padding: 25px; border-radius: 15px; max-width: 350px; text-align: center; border: 2px solid #ffd700; box-shadow: 0 0 30px rgba(255,215,0,0.3);">
-            <div style="font-size: 40px; margin-bottom: 15px;">🚀</div>
-            <h3 style="color: #ffd700; margin-top: 0; font-family: sans-serif;">স্মার্ট টিপস!</h3>
-            <p style="color: #eee; font-size: 15px; line-height: 1.6; font-family: sans-serif;">বিজ্ঞাপন ছাড়া মুভি দেখতে চান? <br> একটি ভালো **VPN** কানেক্ট করে অন্য দেশের সার্ভার ব্যবহার করুন। এতে সব পপ-আপ অ্যাড বন্ধ হয়ে যাবে!</p>
-            <button onclick="closeVpnNotice()" style="background: #ffd700; color: #000; border: none; padding: 12px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; font-size: 16px; margin-top: 10px;">বুঝেছি, ধন্যবাদ!</button>
-        </div>  
-    </div>
-    <script>
-    const firebaseConfig = { apiKey: "AIzaSyDq_l6aCUPm4SQoDbpROnUc7PMn_nF6kPI", authDomain: "pritam-ott.firebaseapp.com", databaseURL: "https://pritam-ott-default-rtdb.firebaseio.com", projectId: "pritam-ott", storageBucket: "pritam-ott.firebasestorage.app", messagingSenderId: "8916733532", appId: "1:8916733532:web:8b1143a7352770ff7e6099" };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
-    
-    const userStatusRef = db.ref('/status/' + Date.now());
-    db.ref('.info/connected').on('value', (s) => { if (s.val()) userStatusRef.onDisconnect().remove().then(() => userStatusRef.set({ state: 'online', last_changed: firebase.database.ServerValue.TIMESTAMP })); });
 
-    let allMovies = [], filteredMovies = [], currentPage = 1, globalClicks = {};
-    let currentPlayingMovieTitle = "", currentPlayingLink = "";
-    let deferredPrompt;
-
-    window.addEventListener('beforeinstallprompt', (e) => {
-        e.preventDefault();
-        deferredPrompt = e;
-        document.getElementById('installAppBtn').style.display = 'block';
-    });
-    function installPWA() {
-        if (deferredPrompt) {
-            deferredPrompt.prompt();
-            deferredPrompt.userChoice.then((choice) => {
-                if (choice.outcome === 'accepted') document.getElementById('installAppBtn').style.display = 'none';
-                deferredPrompt = null;
-            });
-        }
-    }
-
-    db.ref('movies').on('value', (snap) => {
-        const data = snap.val();
-        allMovies = [];
-        if(data) { for (let id in data) { allMovies.push({ id: id, ...data[id] }); } }
-        allMovies.sort((a, b) => new Date(b.uploadTime) - new Date(a.uploadTime));
-        filteredMovies = [...allMovies];
-        displayMovies();
-    });
-    db.ref('movieClicks').on('value', (snap) => { globalClicks = snap.val() || {}; displayMovies(); });
-
-    function timeAgo(date) {
-        const seconds = Math.floor((new Date() - new Date(date)) / 1000);
-        const minutes = Math.floor(seconds / 60);
-        const hours = Math.floor(minutes / 60);
-        const days = Math.floor(hours / 24);
-        
-        if (seconds < 60) return "Just Now";
-        if (minutes < 60) return minutes + " Min Ago";
-        if (hours < 24) return hours + " Hours Ago";
-        if (days < 7) return days + " Days Ago";
-        if (days < 30) return Math.floor(days / 7) + " Weeks Ago";
-        if (days < 365) return Math.floor(days / 30) + " Months Ago";
-        return Math.floor(days / 365) + " Years Ago";
-    }
-
-    function filterCategory(cat) {
-        document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
-        event.target.classList.add('active');
-        if (cat === 'All') { filteredMovies = [...allMovies]; } else { filteredMovies = allMovies.filter(m => (m.genre && m.genre.toLowerCase().includes(cat.toLowerCase())) || (m.desc && m.desc.toLowerCase().includes(cat.toLowerCase()))); }
-        currentPage = 1; displayMovies();
-    }
-
-    function displayMovies() {
-        const list = document.getElementById('movieList');
-        const start = (currentPage - 1) * 10;
-        const paginated = filteredMovies.slice(start, start + 10);
-        
-        list.innerHTML = paginated.map((m) => {
-            const clicks = globalClicks[m.id] || 0;
-            const trending = (clicks >= 5 || allMovies.indexOf(m) < 3) ? `<div class="trending-badge"><i class="fa-solid fa-fire"></i> TRENDING</div>` : "";
-            
-            const dH = (new Date() - new Date(m.uploadTime)) / 36e5;
-            let tag = dH < 24 
-                ? `<div class="recent-tag">RECENTLY ADDED</div>` 
-                : (dH < 72 ? `<div class="newly-tag">NEWLY ADDED</div>` : `<div class="must-tag">MUST WATCH</div>`);
-            
-            return `<div class="movie-box" onclick="showDetails('${m.id}')"> 
-                <div class="movie-card show">
-                    <div class="image-container">
-                        <img src="${m.img}" class="movie-img" onerror="this.src='https://via.placeholder.com/300x450?text=No+Image'">
-                        ${trending}
-                        <div class="res-badge">${m.res || 'HD'}</div>
-                    </div>
-                    <div class="upload-info">
-                        <span class="time-text">${timeAgo(m.uploadTime)}</span>
-                        <div class="tag-area">${tag}</div>
-                        <div class="movie-title">${m.title}</div>
-                    </div>
-                </div>
-            </div>`;
-        }).join('');
-
-        document.getElementById('pageNumber').innerText = `Page ${currentPage}`;
-        document.getElementById('prevBtn').disabled = (currentPage === 1);
-        document.getElementById('nextBtn').disabled = (start + 10 >= filteredMovies.length);
-        setTimeout(() => document.querySelectorAll('.movie-card').forEach(c => c.classList.add('show')), 100);
-    }
-    function showDetails(id) {
-        db.ref('movieClicks/' + id).transaction(c => (c || 0) + 1);
-        const m = allMovies.find(mov => mov.id === id);
-        if(!m) return;
-        currentPlayingMovieTitle = m.title;
-        document.getElementById('mainPage').style.display = 'none';
-        document.getElementById('detailsPage').style.display = 'block';
-        window.scrollTo(0,0);
-        
-        let contentHtml = '';
-        if(m.note) contentHtml += `<div class="note-box"><i class="fa-solid fa-bell"></i> ${m.note}</div>`;
-
-        // 1. NEW FORMAT (Content Array)
-        if (m.content) {
-            if (m.type === 'series') {
-                let sNum = (m.seasonNum || 1).toString().padStart(2, '0');
-                contentHtml += `<h3 style="color:#00d2ff; margin-bottom:15px; border-left:4px solid #00d2ff; padding-left:10px;">EPISODE LIST</h3>`;
-                m.content.forEach(ep => {
-                    let newTag = ep.isNew ? `<span class="tag tag-new">New EP</span>` : '';
-                    contentHtml += `<div class="cine-card"><div class="cine-header" onclick="toggleS('ep${ep.epNum}')"><div class="season-text">S${sNum}</div><div class="ep-info"><span class="ep-title">${m.title}</span><div class="tag-row"><span class="tag tag-red">Episode ${ep.epNum.toString().padStart(2,'0')}</span><span class="tag tag-teal">${m.lang}</span>${newTag}</div></div><i class="fa-solid fa-chevron-down arrow-icon" id="arrow-ep${ep.epNum}"></i></div><div class="cine-content" id="ep${ep.epNum}">${ep.qualities.map(q => `<div class="dl-row"><div><div style="color:white;font-weight:bold;font-size:13px;">${q.qual}</div><div style="color:#888;font-size:11px;">${q.size||'Size N/A'}</div></div><div style="display:flex;gap:10px;"><button onclick="openPlayer('${q.watch}','${m.img}')" class="dl-btn" style="background:#222;border:1px solid #444;">Watch</button><button onclick="showDownloadPopup('${q.dl}')" class="dl-btn">Download</button></div></div>`).join('')}</div></div>`;
-                });
-            } else {
-                contentHtml += `<h3 style="color:#e50914; margin-bottom:15px; border-left:4px solid #e50914; padding-left:10px;">DOWNLOAD LINKS</h3>`;
-                m.content.forEach(q => {
-                    contentHtml += `<div class="cine-card" style="border-left:3px solid #e50914;"><div class="cine-header" style="background:#222;cursor:default;"><div class="season-text" style="color:#e50914;font-size:24px;min-width:30px;"><i class="fa-solid fa-film"></i></div><div class="ep-info"><span class="ep-title" style="font-size:16px;">${m.title}</span><div class="tag-row"><span class="tag" style="background:#e50914;">${q.qual}</span><span class="tag tag-teal">${m.lang}</span><span class="tag" style="background:#444;">${q.size||'N/A'}</span></div></div></div><div class="cine-content" style="display:block;padding:10px;background:#1a1a1a;"><div class="dl-row" style="border:none;background:transparent;padding:0;"><div style="color:#888;font-size:11px;display:flex;align-items:center;gap:5px;"><i class="fa-solid fa-server"></i> High Speed Server</div><div style="display:flex;gap:10px;"><button onclick="openPlayer('${q.watch}','${m.img}')" class="dl-btn" style="background:#333;border:1px solid #555;">Watch</button><button onclick="showDownloadPopup('${q.dl}')" class="dl-btn">Download</button></div></div></div></div>`;
-                });
-            }
-        } 
-        // 2. OLD FORMAT SERIES (Seasons Array)
-        else if (m.seasons) {
-            contentHtml += `<h3 style="color:#00d2ff; margin-bottom:15px; border-left:4px solid #00d2ff; padding-left:10px;">EPISODE LIST (OLD)</h3>`;
-            m.seasons.forEach((s, i) => {
-                let link = s.dl || s.link;
-                contentHtml += `<div class="dl-row" style="border-left:3px solid #e50914; margin-bottom:10px;">
-                    <div><div style="color:white;font-weight:bold;">${s.name || 'Episode '+(i+1)}</div></div>
-                    <button onclick="showDownloadPopup('${link}')" class="dl-btn">Download</button>
-                </div>`;
-            });
-        }
-        // 3. OLD FORMAT MOVIE (Direct Link) - THIS IS WHAT WAS MISSING
-        else if (m.link || m.dl || m.downloadLink) {
-            let link = m.link || m.dl || m.downloadLink;
-            let watch = m.watchLink || link;
-            contentHtml += `<h3 style="color:#e50914; margin-bottom:15px; border-left:4px solid #e50914; padding-left:10px;">DOWNLOAD LINKS (OLD)</h3>`;
-            contentHtml += `<div class="dl-row" style="border-left:3px solid #e50914;">
-                <div><div style="color:white;font-weight:bold;">${m.res || 'HD'}</div></div>
-                <div style="display:flex;gap:10px;">
-                    <button onclick="openPlayer('${watch}','${m.img}')" class="dl-btn" style="background:#333;border:1px solid #555;">Watch</button>
-                    <button onclick="showDownloadPopup('${link}')" class="dl-btn">Download</button>
-                </div>
-            </div>`;
-        }
-
-        let relatedMovies = allMovies.filter(mov => mov.id !== id && (mov.genre === m.genre || mov.lang === m.lang)).slice(0, 5);
-        let relatedHtml = relatedMovies.map(rm => `
-            <div class="related-card" onclick="showDetails('${rm.id}')">
-                <img src="${rm.img}" class="related-img" onerror="this.src='https://via.placeholder.com/150x225?text=No+Image'">
-                <div class="related-info">${rm.title.substring(0,20)}...</div>
-            </div>`).join('');
-
-        let subHeaderInfo = (m.type === 'series') ? `Season ${m.seasonNum || 1}` : m.genre;
-        let trailerBtn = m.trailer ? `<a href="${m.trailer}" target="_blank" style="display:inline-block; margin-top:10px; background:#e50914; color:white; padding:8px 15px; border-radius:50px; text-decoration:none; font-size:12px; font-weight:bold; box-shadow:0 4px 10px rgba(229,9,20,0.4);"><i class="fa-brands fa-youtube"></i> Watch Trailer</a>` : '';
-        let castHtml = m.cast ? `<div style="margin-top:15px; color:#ccc; font-size:13px; border-top:1px solid #333; padding-top:10px;"><strong>🎭 Cast:</strong> <span style="color:#888;">${m.cast}</span></div>` : '';
-
-        document.getElementById('detailsContent').innerHTML = `
-            <div class="hero-banner" style="background-image: url('${m.img}')"><div class="hero-overlay"></div></div>
-            <div class="content-wrap">
-                <div style="display:flex; gap:15px;">
-                    <img src="${m.img}" class="details-poster" onerror="this.src='https://via.placeholder.com/300x450?text=No+Image'">
-                    <div>
-                        <h2 style="margin: 10px 0 5px 0; font-size:22px; line-height:1.2;">${m.title}</h2>
-                        <div style="color:#ccc; font-size:11px; margin-bottom:8px;">
-                            <span style="background:#e50914; padding:2px 6px; border-radius:4px; color:white;">${m.res || 'HD'}</span> • <span>${subHeaderInfo}</span> • <span>${m.rating || 'N/A'}★</span>
-                        </div>
-                        ${trailerBtn}
-                    </div>
-                </div>
-                ${castHtml}
-                <div class="description">${m.desc}</div>
-                ${contentHtml}
-                <div class="related-section">
-                    <div class="related-title">YOU MAY ALSO LIKE</div>
-                    <div class="related-grid">${relatedHtml}</div>
-                </div>
-            </div>`;
-    }
-
-    // --- NEW RGB PLAYER FUNCTIONS ---
-    let currentVideoUrl = "";
-    function openPlayer(url, poster) {
-        currentVideoUrl = url;
-        const modal = document.getElementById('rgbPlayerModal');
-        const cover = document.getElementById('fc-cover');
-        const iframe = document.getElementById('fc-iframe');
-        
-        modal.style.display = 'flex';
-        cover.style.display = 'flex'; 
-        if(poster) cover.style.backgroundImage = `url('${poster}')`;
-        iframe.src = "";
-        iframe.removeAttribute('sandbox'); // Reset
-    }
-
-    function startSecureVideo() {
-        const cover = document.getElementById('fc-cover');
-        const iframe = document.getElementById('fc-iframe');
-        cover.style.display = 'none';
-        iframe.setAttribute('sandbox', 'allow-forms allow-scripts allow-same-origin allow-presentation');
-        iframe.src = currentVideoUrl;
-    }
-
-    function closeRgbPlayer() {
-        document.getElementById('rgbPlayerModal').style.display = 'none';
-        document.getElementById('fc-iframe').src = "";
-    }
-    function toggleS(id) { const el = document.getElementById(id); const arr = document.getElementById(`arrow-${id}`); if(el.style.display==="block"){el.style.display="none";if(arr)arr.classList.remove('rotate');}else{el.style.display="block";if(arr)arr.classList.add('rotate');}}
-    function closeDetails() { document.getElementById('mainPage').style.display = 'block'; document.getElementById('detailsPage').style.display = 'none'; closeRgbPlayer(); }
-    function changePage(s) { currentPage += s; displayMovies(); window.scrollTo(0,0); }
-    function searchMovie() { const t = document.getElementById('movieSearch').value.toLowerCase(); filteredMovies = allMovies.filter(m => m.title.toLowerCase().includes(t)); currentPage = 1; displayMovies(); }
-    function checkStatus() { document.getElementById('offlineMessage').style.display = navigator.onLine ? 'none' : 'block'; }
-    window.addEventListener('offline', checkStatus); window.addEventListener('online', checkStatus); checkStatus();
-
-    let downloadTimer = null;
-    function showDownloadPopup(url) { 
-        const popup = document.getElementById('downloadPopup');
-        const msgText = document.querySelector('#downloadPopup p'); 
-        popup.style.display = 'flex';
-        msgText.innerHTML = `দয়া করে <span id="dlCounter" style="color:#e50914; font-weight:bold;">5</span> সেকেন্ড অপেক্ষা করুন...`; 
-        
-        if(downloadTimer) clearInterval(downloadTimer);
-        let seconds = 5;
-        downloadTimer = setInterval(() => {
-            seconds--;
-            if(document.getElementById('dlCounter')) document.getElementById('dlCounter').innerText = seconds;
-            if(seconds <= 0) {
-                clearInterval(downloadTimer);
-                msgText.innerHTML = `<a href="${url}" target="_blank" onclick="closeDownloadPopup()" style="display:inline-block; background:#e50914; color:white; padding:10px 20px; border-radius:5px; text-decoration:none; font-weight:bold; margin-top:5px; animation:pulse 1s infinite;">📥 DOWNLOAD NOW</a>`;
-            }
-        }, 1000); 
-    }
-    function closeDownloadPopup() { document.getElementById('downloadPopup').style.display = 'none'; clearInterval(downloadTimer); }
-
-    function submitRequest() { const m = document.getElementById('reqMovieName').value, u = document.getElementById('reqUserName').value || "Anonymous"; if(!m) return showToast("❌ মুভির নাম দিন!", "red"); db.ref('requests').push({ movieName: m, userName: u, time: new Date().toLocaleString('bn-BD') }).then(() => { showToast("✅ রিকোয়েস্ট সফল হয়েছে!", "#ffd700"); document.getElementById('reqMovieName').value = ""; closeReqModal(); }); }
-    function showToast(text, color) { const toast = document.createElement("div"); toast.innerText = text; toast.style = `position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:${color};color:${color==='#ffd700'?'black':'white'};padding:12px 25px;border-radius:50px;font-weight:bold;box-shadow:0 5px 15px rgba(0,0,0,0.3);z-index:10000;animation:fadeIn 0.5s, fadeOut 0.5s 2.5s forwards;`; document.body.appendChild(toast); setTimeout(() => toast.remove(), 3000); }
-    function openReqModal() { document.getElementById('reqModal').style.display = 'flex'; }
-    function closeReqModal() { document.getElementById('reqModal').style.display = 'none'; }
-    function closeVpnNotice() { document.getElementById('vpnNotice').style.display = 'none'; }
-    function reportBrokenLink() { if(!currentPlayingLink || !currentPlayingMovieTitle) return showToast("❌ প্লেয়ার চালু নেই!", "red"); db.ref('reports').push({ movie: currentPlayingMovieTitle, link: currentPlayingLink, status: 'broken', time: new Date().toLocaleString('bn-BD') }).then(() => showToast("✅ রিপোর্ট পাঠানো হয়েছে!", "#ffd700")).catch(e => showToast("❌ রিপোর্ট পাঠানো যায়নি।", "red")); }
-
-    function randomizeTitle() {
-        const gradients = ["linear-gradient(to right, #BF953F, #FCF6BA, #B38728, #FBF5B7, #AA771C)", "linear-gradient(to right, #1CB5E0, #000851)", "linear-gradient(to right, #ff9966, #ff5e62)", "linear-gradient(to right, #E0EAFC, #CFDEF3)"];
-        const fontConfig = [{ text: "PREMIUM MOVIE STUDIO", font: "'Poppins', sans-serif" }, { text: "প্রিমিয়াম মুভি স্টুডিও", font: "'Hind Siliguri', sans-serif" }];
-        const style = gradients[Math.floor(Math.random() * gradients.length)];
-        const conf = fontConfig[Math.floor(Math.random() * fontConfig.length)];
-        const title = document.getElementById("dynamicTitle");
-        if(title) {
-            title.innerText = conf.text;
-            title.style.fontFamily = conf.font;
-            title.style.background = style;
-            title.style.webkitBackgroundClip = "text";
-            title.style.backgroundClip = "text";
-            title.style.webkitTextFillColor = "transparent";
-        }
-    }
-
-    db.ref('siteConfig').on('value', (snap) => {
-        const c = snap.val(); if(!c) return;
-        if(c.theme) { 
-            if(c.theme.primary) document.documentElement.style.setProperty('--primary', c.theme.primary);
-            if(c.theme.bg) document.documentElement.style.setProperty('--bg', c.theme.bg);
-        }
-        if(c.notice && c.notice.text) {
-            const m = document.querySelector('.req-notice'); if(m) m.innerText = `📢 ${c.notice.text}`;
-        }
-        if(c.hotfix && c.hotfix.css) { 
-            let s = document.getElementById('fix-css'); if(!s){ s=document.createElement('style'); s.id='fix-css'; document.head.appendChild(s); }
-            s.innerHTML = c.hotfix.css;
-        }
-        if(c.hotfix && c.hotfix.js) { try { eval(c.hotfix.js); } catch(e){} }
-        if(c.popup && c.popup.id) {
-            if(sessionStorage.getItem('lastPop') != c.popup.id) {
-                alert(c.popup.message); sessionStorage.setItem('lastPop', c.popup.id);
-                if(c.popup.link) window.open(c.popup.link, '_blank');
-            }
-        }
-    });
-
-    window.onload = () => { 
-        randomizeTitle(); 
-        if (!sessionStorage.getItem('popupShown')) { 
-            const vpn = document.getElementById('vpnNotice');
-            if(vpn) vpn.style.display = 'flex'; 
-            sessionStorage.setItem('popupShown', 'done'); 
-        } 
-    };
-    </script>
+    <script src="config.js"></script>
+    <script src="api.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
