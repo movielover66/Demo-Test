@@ -1,5 +1,7 @@
-// DETAILS (UPDATED)
-// DETAILS (PROFESSIONAL DESIGN UPDATE)
+// ==========================================
+// 1. DETAILS PAGE LOGIC
+// ==========================================
+
 function showDetails(id) {
     db.ref('movieClicks/' + id).transaction(c => (c || 0) + 1);
     const m = allMovies.find(mov => mov.id === id);
@@ -19,18 +21,18 @@ function showDetails(id) {
             let sNum = (m.seasonNum || 1).toString().padStart(2, '0');
             contentHtml += `<h3 style="color:#fff; font-size:14px; margin-bottom:15px; border-left:3px solid var(--primary); padding-left:10px;">EPISODES (SEASON ${sNum})</h3>`;
             
-            m.content.forEach(ep => {
+            m.content.forEach((ep, index) => {
                 let safeS1 = encodeURIComponent(ep.server1 || '');
                 let safeS2 = encodeURIComponent(ep.server2 || '');
                 let safeWatch = encodeURIComponent(ep.watch || '');
                 let safePoster = encodeURIComponent(m.img || '');
-                let lang = m.lang || 'Dual Audio'; // Fallback if undefined
+                let lang = m.lang || 'Dual Audio'; 
 
                 contentHtml += `
                 <div class="premium-card">
                     <div class="card-top">
                         <div class="card-title-group">
-                            <div class="card-title">Episode ${ep.epNum}</div>
+                            <div class="card-title">Episode ${ep.epNum || (index+1)}</div>
                             <div class="card-meta">
                                 <span class="meta-badge badge-res">${m.res || 'HD'}</span>
                                 <span class="meta-badge badge-lang">${lang}</span>
@@ -39,7 +41,7 @@ function showDetails(id) {
                         </div>
                     </div>
                     <div class="action-row">
-                        <button onclick="preparePlayer('${safeS1}','${safeS2}','${safeWatch}','${safePoster}')" class="btn-premium-play">
+                        <button onclick="preparePlayer('${safeS1}','${safeS2}','${safeWatch}','${safePoster}', '${m.id}', ${index})" class="btn-premium-play">
                             <i class="fa-solid fa-play"></i> PLAY NOW
                         </button>
                         <button onclick="showDownloadPopup('${ep.dl}')" class="btn-premium-dl">
@@ -49,7 +51,7 @@ function showDetails(id) {
                 </div>`;
             });
         } 
-        // MOVIE DESIGN (The part you marked)
+        // MOVIE DESIGN
         else {
             contentHtml += `<h3 style="color:#fff; font-size:14px; margin-bottom:15px; border-left:3px solid var(--primary); padding-left:10px;">WATCH MOVIE</h3>`;
             
@@ -58,8 +60,6 @@ function showDetails(id) {
                 let safeS2 = encodeURIComponent(q.server2 || '');
                 let safeWatch = encodeURIComponent(q.watch || '');
                 let safePoster = encodeURIComponent(m.img || '');
-                
-                // Fix for UNDEFINED
                 let langText = (m.lang && m.lang !== 'undefined') ? m.lang : 'Dual Audio';
                 let sizeText = (q.size && q.size !== 'undefined') ? q.size : '';
 
@@ -76,7 +76,7 @@ function showDetails(id) {
                         </div>
                     </div>
                     <div class="action-row">
-                        <button onclick="preparePlayer('${safeS1}','${safeS2}','${safeWatch}','${safePoster}')" class="btn-premium-play">
+                        <button onclick="preparePlayer('${safeS1}','${safeS2}','${safeWatch}','${safePoster}', null, null)" class="btn-premium-play">
                             <i class="fa-solid fa-play"></i> WATCH NOW
                         </button>
                         <button onclick="showDownloadPopup('${q.dl}')" class="btn-premium-dl">
@@ -87,7 +87,7 @@ function showDetails(id) {
             });
         }
     } 
-    // OLD DATA SUPPORT (Fallback)
+    // OLD DATA SUPPORT
     else if (m.link || m.dl || m.downloadLink) {
         let link = m.link || m.dl || m.downloadLink;
         let watch = m.watchLink || link;
@@ -98,7 +98,6 @@ function showDetails(id) {
                     <div class="card-title">${m.title}</div>
                     <div class="card-meta">
                         <span class="meta-badge badge-res">${m.res || 'HD'}</span>
-                        <span class="meta-badge badge-lang">Legacy</span>
                     </div>
                 </div>
             </div>
@@ -113,16 +112,41 @@ function showDetails(id) {
     let relatedHtml = relatedMovies.map(rm => `<div class="related-card" onclick="showDetails('${rm.id}')"><img src="${rm.img}" class="related-img" onerror="this.src='https://via.placeholder.com/150x225?text=No+Image'"><div class="related-info">${rm.title.substring(0,20)}...</div></div>`).join('');
 
     let subHeaderInfo = (m.type === 'series') ? `Season ${m.seasonNum || 1}` : m.genre;
-    let trailerBtn = m.trailer ? `<a href="${m.trailer}" target="_blank" style="display:inline-block; margin-top:10px; background:#e50914; color:white; padding:8px 15px; border-radius:50px; text-decoration:none; font-size:12px; font-weight:bold; box-shadow:0 4px 10px rgba(229,9,20,0.4);"><i class="fa-brands fa-youtube"></i> Watch Trailer</a>` : '';
+    
+    // Trailer Button
+    let trailerBtn = m.trailer 
+        ? `<button onclick="openTrailer('${m.trailer}')" style="margin-top:10px; background:#e50914; color:white; padding:8px 15px; border:none; border-radius:50px; font-size:12px; font-weight:bold; cursor:pointer; display:inline-flex; align-items:center; gap:5px; box-shadow:0 4px 10px rgba(229,9,20,0.4);">
+             <i class="fa-brands fa-youtube"></i> Watch Trailer
+           </button>` 
+        : '';
+    
     let castHtml = m.cast ? `<div style="margin-top:15px; color:#ccc; font-size:13px; border-top:1px solid #333; padding-top:10px;"><strong>🎭 Cast:</strong> <span style="color:#888;">${m.cast}</span></div>` : '';
+    
+    // Hero Play Button
+    let heroPlayBtn = m.trailer 
+        ? `<div class="hero-play-btn" onclick="playInlineHero('${m.trailer}')"><i class="fa-solid fa-play"></i></div>` 
+        : '';
 
     document.getElementById('detailsContent').innerHTML = `
-        <div class="hero-banner" style="background-image: url('${m.img}')"><div class="hero-overlay"></div></div>
+        <div id="heroBannerArea" class="hero-banner" style="background-image: url('${m.img}')">
+            <div class="hero-overlay"></div>
+            ${heroPlayBtn}
+        </div>
+        
         <div class="content-wrap">
-            <div style="display:flex; gap:15px;">
-                <img src="${m.img}" class="details-poster" onerror="this.src='https://via.placeholder.com/300x450?text=No+Image'">
-                <div><h2 style="margin: 10px 0 5px 0;">${m.title}</h2><div style="color:#ccc; font-size:11px;"><span>${m.res || 'HD'}</span> • <span>${subHeaderInfo}</span> • <span>${m.rating || 'N/A'}★</span></div>${trailerBtn}</div>
+            <div style="display:flex; gap:15px; align-items: flex-start;">
+                <img src="${m.img}" class="details-poster" 
+                    style="width:120px; height:180px; object-fit:cover; border-radius:12px; border:2px solid var(--primary); flex-shrink:0;" 
+                    onerror="this.src='https://via.placeholder.com/300x450?text=No+Image'">
+                <div>
+                    <h2 style="margin: 10px 0 5px 0;">${m.title}</h2>
+                    <div style="color:#ccc; font-size:11px;">
+                        <span>${m.res || 'HD'}</span> • <span>${subHeaderInfo}</span> • <span>${m.rating || 'N/A'}★</span>
+                    </div>
+                    ${trailerBtn}
+                </div>
             </div>
+            
             ${castHtml}
             <div class="description">${m.desc}</div>
             ${contentHtml}
@@ -130,38 +154,79 @@ function showDetails(id) {
         </div>`;
 }
 
-
 function toggleS(id) { const el = document.getElementById(id); const arr = document.getElementById(`arrow-${id}`); if(el.style.display==="block"){el.style.display="none";if(arr)arr.classList.remove('rotate');}else{el.style.display="block";if(arr)arr.classList.add('rotate');}}
 function closeDetails() { document.getElementById('mainPage').style.display = 'block'; document.getElementById('detailsPage').style.display = 'none'; closeRgbPlayer(); }
 
-// --- PLAYER SYSTEM WITH VPN TIMER ---
+// ==========================================
+// 2. PLAYER LOGIC (HYBRID: STANDARD + PRO)
+// ==========================================
+
 let currentVideoUrl = "";
 let currentPlayerMode = "sandbox"; 
-let vpnTimerInterval = null; // টাইমার ভেরিয়েবল
+let vpnTimerInterval = null; 
 
-function preparePlayer(s1, s2, watch, poster) {
-    const url1 = decodeURIComponent(s1);
-    const url2 = decodeURIComponent(s2);
-    const url3 = decodeURIComponent(watch); 
+function preparePlayer(s1, s2, watch, poster, movieId, epIndex) {
+    const url1 = decodeURIComponent(s1); // Server 1 (Standard)
+    const url2 = decodeURIComponent(s2); // Server 2 (Standard)
+    const vipUrl = decodeURIComponent(watch); // Watch Link (VIP)
     const img = decodeURIComponent(poster);
 
-    let btnHtml = "";
-    if(url1) btnHtml += `<button onclick="switchServer('${url1}', this)" class="server-btn">Server 1</button>`;
-    if(url2) btnHtml += `<button onclick="switchServer('${url2}', this)" class="server-btn">Server 2</button>`;
-    if(url3) btnHtml += `<button onclick="switchServer('${url3}', this)" class="server-btn">Watch</button>`;
-
-    document.getElementById('dynamicServerBtns').innerHTML = btnHtml;
+    // --- A. STANDARD BUTTONS (NORMAL / SOUNDBOX) ---
+    let stdBtns = `<div id="stdServerList" style="display:flex; gap:8px; width:100%;">`;
     
-    let defaultUrl = url3 || url1 || url2;
-    if(defaultUrl) {
-        openPlayer(defaultUrl, img);
-        setTimeout(() => {
-            const btns = document.querySelectorAll('.server-btn');
-            if(btns.length > 0) {
-                if(url3) btns[btns.length-1].classList.add('active'); 
-                else btns[0].classList.add('active');
-            }
-        }, 100);
+    if(url1) stdBtns += `<button onclick="switchServer('${url1}', this)" class="server-btn" style="border-left:3px solid #00d2ff;">Server 1</button>`;
+    if(url2) stdBtns += `<button onclick="switchServer('${url2}', this)" class="server-btn" style="border-left:3px solid #ffd700;">Server 2</button>`;
+    if(vipUrl && vipUrl !== 'undefined' && vipUrl !== '') {
+        stdBtns += `<button onclick="switchServer('${vipUrl}', this)" class="server-btn" style="background:var(--primary); color:white; border:none;">Watch (VIP)</button>`;
+    }
+    stdBtns += `</div>`;
+
+    // --- B. PRO BUTTONS (HIDDEN INITIALLY) ---
+    let isSeries = false, sNum = 1, epNum = 1;
+    let tmdbId = movieId ? movieId.replace('mov_', '') : '';
+    const m = allMovies.find(mov => mov.id === movieId);
+    
+    if(m && m.type === 'series' && m.content && m.content[epIndex]) {
+        isSeries = true; sNum = m.seasonNum || 1; epNum = epIndex + 1; 
+    }
+
+    let proBtns = `<div id="proServerList" class="server-grid" style="display:none;">`;
+    
+    // 🌟 5+ PRO Servers
+    const proServers = [
+        { name: "🚀 VIP SERVER", url: vipUrl },
+        { name: "🌍 MULTI-AUDIO", url: isSeries ? `https://vidsrc.cc/v2/embed/tv/${tmdbId}/${sNum}/${epNum}` : `https://vidsrc.cc/v2/embed/movie/${tmdbId}` },
+        { name: "⚡ SUPER FAST", url: isSeries ? `https://vidlink.pro/tv/${tmdbId}/${sNum}/${epNum}` : `https://vidlink.pro/movie/${tmdbId}` },
+        { name: "🇮🇳 HINDI AUTO", url: isSeries ? `https://multiembed.mov/?video_id=${tmdbId}&tmdb=1&s=${sNum}&e=${epNum}&lang=hi` : `https://multiembed.mov/?video_id=${tmdbId}&tmdb=1&lang=hi` },
+        { name: "🇬🇧 ENGLISH", url: isSeries ? `https://vidsrc.net/embed/tv/${tmdbId}/${sNum}/${epNum}` : `https://vidsrc.net/embed/movie/${tmdbId}` },
+        { name: "📂 BACKUP S1", url: isSeries ? `https://2embed.cc/embed/tv/${tmdbId}&s=${sNum}&e=${epNum}` : `https://2embed.cc/embed/movie/${tmdbId}` }
+    ];
+
+    proServers.forEach(srv => {
+        if(srv.url && srv.url !== 'undefined' && srv.url !== '') {
+            proBtns += `<button onclick="switchServer('${srv.url}', this)" class="server-btn pro-btn">${srv.name}</button>`;
+        }
+    });
+    proBtns += `</div>`;
+
+    // --- C. NEXT EPISODE ---
+    let nextEpHtml = "";
+    if (isSeries && m && m.content && m.content[epIndex + 1]) {
+        const nextEp = m.content[epIndex + 1];
+        const nS1 = encodeURIComponent(nextEp.server1 || '');
+        const nS2 = encodeURIComponent(nextEp.server2 || '');
+        const nWatch = encodeURIComponent(nextEp.watch || '');
+        const nPoster = encodeURIComponent(m.img || '');
+        nextEpHtml = `<div style="margin-top:10px; width:100%;"><button onclick="preparePlayer('${nS1}','${nS2}','${nWatch}','${nPoster}', '${movieId}', ${epIndex + 1})" class="server-btn" style="background:#00d2ff; color:#000; width:100%; font-weight:900;">NEXT EPISODE <i class="fa-solid fa-forward-step"></i></button></div>`;
+    }
+
+    document.getElementById('dynamicServerBtns').innerHTML = stdBtns + proBtns + nextEpHtml;
+    
+    // Default Play
+    let playUrl = vipUrl || url1 || url2;
+    if(playUrl) {
+        openPlayer(playUrl, img);
+        setPlayerMode('sandbox'); 
     } else {
         showToast("No playable links found!", "red");
     }
@@ -180,13 +245,12 @@ function openPlayer(url, poster) {
     if(poster) cover.style.backgroundImage = `url('${poster}')`;
     iframe.src = "";
     
-    setPlayerMode('sandbox'); // ডিফল্ট সিকিউর মোড
+    setPlayerMode('sandbox'); 
 
-    // VPN TIMER START (প্রতি ৫ মিনিট পর পর)
     if(vpnTimerInterval) clearInterval(vpnTimerInterval);
     vpnTimerInterval = setInterval(() => {
         document.getElementById('vpnNotice').style.display = 'flex';
-    }, 300000); // 300000ms = 5 মিনিট
+    }, 300000); 
 }
 
 function switchServer(url, btn) {
@@ -199,24 +263,47 @@ function switchServer(url, btn) {
 
 function setPlayerMode(mode) {
     currentPlayerMode = mode;
+    
     document.getElementById('btnNormal').classList.remove('active');
     document.getElementById('btnSandbox').classList.remove('active');
+    document.getElementById('btnPro').classList.remove('active'); // Reset Pro Button
     
     const iframe = document.getElementById('fc-iframe');
     const infoBox = document.getElementById('modeInfoText');
+    const stdList = document.getElementById('stdServerList');
+    const proList = document.getElementById('proServerList');
 
-    if(mode === 'sandbox') {
-        document.getElementById('btnSandbox').classList.add('active');
-        // UPDATE: Added 'allow-orientation-lock' and 'allow-popups' for fullscreen fix
+    if(mode === 'pro') {
+        // 🔥 PRO MODE
+        document.getElementById('btnPro').classList.add('active');
+        if(stdList) stdList.style.display = 'none';
+        if(proList) proList.style.display = 'grid';
+        
         iframe.setAttribute('sandbox', 'allow-forms allow-scripts allow-same-origin allow-presentation allow-orientation-lock allow-popups');
-        if(infoBox) infoBox.style.borderLeft = "3px solid #ffd700";
+        if(infoBox) infoBox.innerHTML = "<span style='color:#00ff00'>★ PRO PLAYER:</span> Unlocked all premium servers.";
+    
+    } else if(mode === 'sandbox') {
+        // 🔊 SOUNDBOX
+        document.getElementById('btnSandbox').classList.add('active');
+        if(stdList) stdList.style.display = 'flex';
+        if(proList) proList.style.display = 'none';
+        
+        iframe.setAttribute('sandbox', 'allow-forms allow-scripts allow-same-origin allow-presentation allow-orientation-lock allow-popups');
+        if(infoBox) infoBox.innerHTML = "<span style='color:#ffd700'>🔊 SOUNDBOX:</span> Ad-Free Experience. Standard Servers.";
+
     } else {
+        // ▶ NORMAL
         document.getElementById('btnNormal').classList.add('active');
+        if(stdList) stdList.style.display = 'flex';
+        if(proList) proList.style.display = 'none';
+
         iframe.removeAttribute('sandbox');
-        if(infoBox) infoBox.style.borderLeft = "3px solid #00d2ff";
+        if(infoBox) infoBox.innerHTML = "<span style='color:#00d2ff'>▶ NORMAL:</span> Standard Mode. Supports all players.";
     }
     
-    if(iframe.src) iframe.src = currentVideoUrl;
+    if(iframe.src && iframe.src !== window.location.href) {
+       // Optional refresh logic
+    }
 }
 
 function startVideo() {
@@ -224,8 +311,7 @@ function startVideo() {
     const iframe = document.getElementById('fc-iframe');
     cover.style.display = 'none';
     
-    if(currentPlayerMode === 'sandbox') {
-        // UPDATE: Added 'allow-orientation-lock' and 'allow-popups' here too
+    if(currentPlayerMode === 'sandbox' || currentPlayerMode === 'pro') {
         iframe.setAttribute('sandbox', 'allow-forms allow-scripts allow-same-origin allow-presentation allow-orientation-lock allow-popups');
     } else {
         iframe.removeAttribute('sandbox');
@@ -236,13 +322,13 @@ function startVideo() {
 function closeRgbPlayer() {
     document.getElementById('rgbPlayerModal').style.display = 'none';
     document.getElementById('fc-iframe').src = "";
-    
-    // টাইমার বন্ধ করা
     if(vpnTimerInterval) clearInterval(vpnTimerInterval);
 }
 
+// ==========================================
+// 3. HELPERS & UTILS
+// ==========================================
 
-// HELPERS & OTHER LOGIC
 function checkStatus() { document.getElementById('offlineMessage').style.display = navigator.onLine ? 'none' : 'block'; }
 window.addEventListener('offline', checkStatus); window.addEventListener('online', checkStatus); checkStatus();
 
@@ -256,7 +342,7 @@ function showToast(text, color) { const toast = document.createElement("div"); t
 
 function openReqModal() { document.getElementById('reqModal').style.display = 'flex'; }
 function closeReqModal() { document.getElementById('reqModal').style.display = 'none'; }
-function closeVpnNotice() { document.getElementById('vpnNotice').style.display = 'none'; }
+function closeVpnNotice() { document.getElementById('vpnNotice') ? document.getElementById('vpnNotice').style.display = 'none' : null; }
 function changePage(s) { currentPage += s; displayMovies(); window.scrollTo(0,0); }
 function searchMovie() { const t = document.getElementById('movieSearch').value.toLowerCase(); filteredMovies = allMovies.filter(m => m.title.toLowerCase().includes(t)); currentPage = 1; displayMovies(); }
 
@@ -277,9 +363,57 @@ function randomizeTitle() {
 }
 
 window.onload = () => { 
-    randomizeTitle(); 
-    if (!sessionStorage.getItem('popupShown')) { 
-        document.getElementById('vpnNotice').style.display = 'flex'; 
+    randomizeTitle();
+    // Check if vpnNotice element exists before trying to show it
+    const vpnEl = document.getElementById('vpnNotice');
+    if (vpnEl && !sessionStorage.getItem('popupShown')) { 
+        vpnEl.style.display = 'flex'; 
         sessionStorage.setItem('popupShown', 'done'); 
     } 
 };
+// ==========================================
+// 4. TRAILER LOGIC
+// ==========================================
+
+function openTrailer(url) {
+    if (!url) return showToast("Trailer not available!", "red");
+
+    let embedUrl = url;
+    if (url.includes("watch?v=")) {
+        const videoId = url.split("v=")[1].split("&")[0];
+        embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
+    } else if (url.includes("youtu.be/")) {
+        const videoId = url.split("youtu.be/")[1];
+        embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
+    }
+
+    document.getElementById('trailerFrame').src = embedUrl;
+    document.getElementById('trailerModal').style.display = 'flex';
+}
+
+function closeTrailer() {
+    document.getElementById('trailerModal').style.display = 'none';
+    document.getElementById('trailerFrame').src = ""; 
+}
+function playInlineHero(url) {
+    if (!url) return showToast("Trailer not available!", "red");
+
+    let embedUrl = url;
+    if (url.includes("watch?v=")) {
+        const videoId = url.split("v=")[1].split("&")[0];
+        embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&controls=1&rel=0`;
+    } else if (url.includes("youtu.be/")) {
+        const videoId = url.split("youtu.be/")[1];
+        embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&controls=1&rel=0`;
+    }
+
+    const banner = document.getElementById('heroBannerArea');
+    if (banner) {
+        banner.innerHTML = `<iframe src="${embedUrl}" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+        const contentWrap = document.querySelector('.content-wrap');
+        if(contentWrap) {
+            contentWrap.style.marginTop = '0px'; 
+            contentWrap.style.transition = '0.5s'; 
+        }
+    }
+}
